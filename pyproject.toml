@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "space-invaders"
+version = "0.1.0"
+requires-python = ">=3.15"
+dependencies = [
+    "pygame-ce>=2.5.8",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "SIM",
+    "RUF",
+]
+ignore = [
+    "E111",
+    "E114",
+    "E117",
+    "E501",
+]
+
+[tool.mypy]
+python_version = "3.15"
+files = ["src"]
+
+disallow_untyped_defs = true
+
+warn_return_any = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+strict_equality = true
+
+pretty = true
