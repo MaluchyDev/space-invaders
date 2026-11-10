@@ -5,7 +5,8 @@ import pygame
 import space_invaders.settings as cfg
 from space_invaders.enemy_fleet import EnemyFleet
 from space_invaders.player import Player
-from space_invaders.type_aliases import HorizontalDirection
+from space_invaders.projectile import Projectile
+from space_invaders.type_aliases import HorizontalDirection, Position2D
 
 
 class Game:
@@ -26,6 +27,10 @@ class Game:
 
         # === FLOTA ENEMIGA ===
         self._enemy_fleet: EnemyFleet = EnemyFleet()
+
+        # === PROYECTIL ===
+        self._projectile: Projectile | None = None
+        self._shot_cooldown_remaining: float = 0.0
 
     def run(self) -> None:
         """Ejecuta el bucle principal hasta finalizar la aplicación."""
@@ -79,8 +84,52 @@ class Game:
         direction: HorizontalDirection = self._get_movement_direction()
         self._player.update(direction=direction, dt=dt)
         self._enemy_fleet.update(dt=dt)
+        self._update_projectile(dt=dt)
 
     def _render_world(self) -> None:
         """Renderiza el mundo."""
         self._player.draw(surface=self._screen, color=cfg.PLAYER_COLOR)
         self._enemy_fleet.draw(surface=self._screen)
+
+        if self._projectile is not None:
+            self._projectile.draw(surface=self._screen)
+
+    def _try_shoot(self) -> None:
+        """Intenta crear un proyectil si el disparo está autorizado."""
+        if not self._can_shoot():
+            return
+
+        # Calcular la posición inicial del proyectil.
+        spawn_position_x: int = self._player.midtop[0] - cfg.PROJECTILE_WIDTH // 2
+        spawn_position_y: int = self._player.midtop[1] - cfg.PROJECTILE_HEIGHT
+        spawn_position: Position2D = (spawn_position_x, spawn_position_y)
+
+        self._projectile = Projectile(
+            spawn_position=spawn_position,
+            vertical_speed=cfg.PLAYER_PROJECTILE_VERTICAL_SPEED,
+            color=cfg.PLAYER_PROJECTILE_COLOR,
+        )
+
+        self._shot_cooldown_remaining = cfg.PLAYER_SHOT_COOLDOWN
+
+    def _can_shoot(self) -> bool:
+        """Indica si el jugador solicita un disparo y puede realizarlo."""
+        keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
+
+        return keys[pygame.K_SPACE] and (
+            self._projectile is None and self._shot_cooldown_remaining == 0.0
+        )
+
+    def _update_projectile(self, *, dt: float) -> None:
+        """Gestiona el disparo y el ciclo de vida del proyectil del jugador."""
+        # Actualiza el cooldown y procesa la solicitud de disparo.
+        self._shot_cooldown_remaining = max(0.0, self._shot_cooldown_remaining - dt)
+        self._try_shoot()
+
+        if self._projectile is None:
+            return
+
+        # Actualiza y elimina el proyectil cuando abandona la pantalla.
+        self._projectile.update(dt=dt)
+        if self._projectile.bottom <= 0:
+            self._projectile = None

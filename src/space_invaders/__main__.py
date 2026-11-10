@@ -1,4 +1,4 @@
-"""Punto de entrada de la aplicación Space Invaders."""
+"""Inicia la aplicación y garantiza el cierre de Pygame."""
 
 import pygame
 

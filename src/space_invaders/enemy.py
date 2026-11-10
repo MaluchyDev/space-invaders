@@ -16,12 +16,15 @@ class Enemy:
         color: ColorRGB,
     ) -> None:
         """Inicializa la geometría y el estado del enemigo."""
+        # Geometría del enemigo.
         self._rect: pygame.Rect = pygame.Rect((0, 0), cfg.ENEMY_SIZE)
-        self._rect.topleft = spawn_position  # Posición geométrica
+        self._rect.topleft = spawn_position
+
+        # Posición lógica del enemigo.
         self._logical_position: Position2DFloat = (
             float(self._rect.x),
             float(self._rect.y),
-        )  # Posición lógica
+        )
 
         self._color: ColorRGB = color
 

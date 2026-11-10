@@ -3,7 +3,7 @@
 import pygame
 
 import space_invaders.settings as cfg
-from space_invaders.type_aliases import ColorRGB, HorizontalDirection
+from space_invaders.type_aliases import ColorRGB, HorizontalDirection, Position2D
 
 
 class Player:
@@ -11,14 +11,22 @@ class Player:
 
     def __init__(self) -> None:
         """Inicializa la geometría y el estado de movimiento del jugador."""
+        # Geometría del jugador.
         self._rect: pygame.Rect = pygame.Rect((0, 0), cfg.PLAYER_SIZE)
         self._rect.midbottom = cfg.PLAYER_START_MIDBOTTOM
-        self._x: float = float(self._rect.centerx)  # Posición lógica
 
-        # === LÍMITES DE MOVIMIENTO ===
+        # Posición lógica del jugador.
+        self._x: float = float(self._rect.centerx)
+
+        # Límites de movimiento.
         half_width: float = self._rect.width / 2
         self._min_center_x: float = half_width
         self._max_center_x: float = cfg.WINDOW_WIDTH - half_width
+
+    @property
+    def midtop(self) -> Position2D:
+        """Devuelve el centro del borde superior del jugador."""
+        return self._rect.midtop
 
     def update(self, *, direction: HorizontalDirection, dt: float) -> None:
         """Actualiza el movimiento horizontal."""

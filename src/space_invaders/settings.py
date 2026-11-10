@@ -55,3 +55,13 @@ FLEET_ROW_COLORS: Final[tuple[ColorRGB, ...]] = (
     (230, 185, 85),  # Fila 1: dorado
     (160, 135, 220),  # Fila 2: violeta
 )
+
+# === PROYECTILES ===
+PROJECTILE_WIDTH: Final[int] = 6
+PROJECTILE_HEIGHT: Final[int] = 16
+PROJECTILE_SIZE: Final[Size] = (PROJECTILE_WIDTH, PROJECTILE_HEIGHT)
+
+# === DISPARO DEL JUGADOR ===
+PLAYER_PROJECTILE_VERTICAL_SPEED: Final[float] = -520.0
+PLAYER_PROJECTILE_COLOR: Final[ColorRGB] = (130, 235, 185)
+PLAYER_SHOT_COOLDOWN: Final[float] = 0.25
