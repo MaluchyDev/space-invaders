@@ -29,8 +29,13 @@ class Game:
         self._enemy_fleet: EnemyFleet = EnemyFleet()
 
         # === PROYECTIL ===
-        self._projectile: Projectile | None = None
-        self._shot_cooldown_remaining: float = 0.0
+        # Disparo del jugador
+        self._player_projectile: Projectile | None = None
+        self._player_shot_cooldown_remaining: float = 0.0
+
+        # Disparo de los enemigos
+        self._enemy_projectiles: list[Projectile] = []
+        self._enemy_shot_cooldown_remaining: float = 0.0
 
     def run(self) -> None:
         """Ejecuta el bucle principal hasta finalizar la aplicación."""
@@ -84,19 +89,26 @@ class Game:
         direction: HorizontalDirection = self._get_movement_direction()
         self._player.update(direction=direction, dt=dt)
         self._enemy_fleet.update(dt=dt)
-        self._update_projectile(dt=dt)
+        self._update_player_projectile(dt=dt)
+        self._update_enemy_projectiles(dt=dt)
 
     def _render_world(self) -> None:
         """Renderiza el mundo."""
+        # Dibuja al jugador y la flota enemiga.
         self._player.draw(surface=self._screen, color=cfg.PLAYER_COLOR)
         self._enemy_fleet.draw(surface=self._screen)
 
-        if self._projectile is not None:
-            self._projectile.draw(surface=self._screen)
+        # Dibuja los proyectiles del jugador y de la flota enemiga.
 
-    def _try_shoot(self) -> None:
+        if self._player_projectile is not None:
+            self._player_projectile.draw(surface=self._screen)
+
+        for enemy_projectile in self._enemy_projectiles:
+            enemy_projectile.draw(surface=self._screen)
+
+    def _try_player_shoot(self) -> None:
         """Intenta crear un proyectil si el disparo está autorizado."""
-        if not self._can_shoot():
+        if not self._player_can_shoot():
             return
 
         # Calcular la posición inicial del proyectil.
@@ -104,32 +116,87 @@ class Game:
         spawn_position_y: int = self._player.midtop[1] - cfg.PROJECTILE_HEIGHT
         spawn_position: Position2D = (spawn_position_x, spawn_position_y)
 
-        self._projectile = Projectile(
+        self._player_projectile = Projectile(
             spawn_position=spawn_position,
             vertical_speed=cfg.PLAYER_PROJECTILE_VERTICAL_SPEED,
             color=cfg.PLAYER_PROJECTILE_COLOR,
         )
 
-        self._shot_cooldown_remaining = cfg.PLAYER_SHOT_COOLDOWN
+        # Reinicia el cooldown.
+        self._player_shot_cooldown_remaining = cfg.PLAYER_SHOT_COOLDOWN
 
-    def _can_shoot(self) -> bool:
+    def _player_can_shoot(self) -> bool:
         """Indica si el jugador solicita un disparo y puede realizarlo."""
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
 
-        return keys[pygame.K_SPACE] and (
-            self._projectile is None and self._shot_cooldown_remaining == 0.0
+        return (
+            keys[pygame.K_SPACE]
+            and self._player_projectile is None
+            and self._player_shot_cooldown_remaining == 0.0
         )
 
-    def _update_projectile(self, *, dt: float) -> None:
+    def _try_enemy_shoot(self) -> None:
+        """Intenta crear un proyectil enemigo si se cumplen las condiciones."""
+        if not self._enemy_can_shoot():
+            return
+
+        enemy_shot_origin: Position2D | None = self._enemy_fleet.get_random_shot_origin()
+
+        if enemy_shot_origin is None:
+            return
+
+        # Calcular la posición inicial del proyectil
+        projectile_spawn_position_x: int = enemy_shot_origin[0] - cfg.PROJECTILE_WIDTH // 2
+        projectile_spawn_position_y: int = enemy_shot_origin[1]
+        projectile_spawn_position: Position2D = (
+            projectile_spawn_position_x,
+            projectile_spawn_position_y,
+        )
+
+        projectile: Projectile = Projectile(
+            spawn_position=projectile_spawn_position,
+            vertical_speed=cfg.ENEMY_PROJECTILE_VERTICAL_SPEED,
+            color=cfg.ENEMY_PROJECTILE_COLOR,
+        )
+
+        # Registra el proyectil y reinicia el cooldown.
+        self._enemy_projectiles.append(projectile)
+        self._enemy_shot_cooldown_remaining = cfg.ENEMY_SHOT_COOLDOWN
+
+    def _enemy_can_shoot(self) -> bool:
+        """Indica si puede generarse un nuevo proyectil enemigo."""
+        return (
+            self._enemy_fleet.has_enemies
+            and len(self._enemy_projectiles) < cfg.MAX_ENEMY_PROJECTILES
+            and self._enemy_shot_cooldown_remaining == 0.0
+        )
+
+    def _update_player_projectile(self, *, dt: float) -> None:
         """Gestiona el disparo y el ciclo de vida del proyectil del jugador."""
         # Actualiza el cooldown y procesa la solicitud de disparo.
-        self._shot_cooldown_remaining = max(0.0, self._shot_cooldown_remaining - dt)
-        self._try_shoot()
+        self._player_shot_cooldown_remaining = max(0.0, self._player_shot_cooldown_remaining - dt)
+        self._try_player_shoot()
 
-        if self._projectile is None:
+        if self._player_projectile is None:
             return
 
         # Actualiza y elimina el proyectil cuando abandona la pantalla.
-        self._projectile.update(dt=dt)
-        if self._projectile.bottom <= 0:
-            self._projectile = None
+        self._player_projectile.update(dt=dt)
+        if self._player_projectile.bottom <= 0:
+            self._player_projectile = None
+
+    def _update_enemy_projectiles(self, *, dt: float) -> None:
+        """Gestiona los disparos enemigos y el ciclo de vida de sus proyectiles."""
+        # Actualiza el cooldown y procesa la solicitud de disparo.
+        self._enemy_shot_cooldown_remaining = max(0.0, self._enemy_shot_cooldown_remaining - dt)
+        self._try_enemy_shoot()
+
+        # Actualiza los proyectiles y conserva los que siguen en pantalla.
+        new_enemy_projectiles: list[Projectile] = []
+
+        for enemy_projectile in self._enemy_projectiles:
+            enemy_projectile.update(dt=dt)
+            if enemy_projectile.top < cfg.WINDOW_HEIGHT:
+                new_enemy_projectiles.append(enemy_projectile)
+
+        self._enemy_projectiles = new_enemy_projectiles

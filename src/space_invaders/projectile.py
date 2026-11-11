@@ -35,6 +35,11 @@ class Projectile:
         """Devuelve el borde inferior del proyectil."""
         return self._rect.bottom
 
+    @property
+    def top(self) -> int:
+        """Devuelve el borde superior del proyectil."""
+        return self._rect.top
+
     def update(self, *, dt: float) -> None:
         """Actualiza la posición vertical del proyectil."""
         x: float = self._logical_position[0]

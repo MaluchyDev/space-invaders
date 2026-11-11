@@ -34,6 +34,11 @@ class Enemy:
         return self._rect.left
 
     @property
+    def midbottom(self) -> Position2D:
+        """Devuelve el centro del borde inferior del enemigo."""
+        return self._rect.midbottom
+
+    @property
     def right(self) -> int:
         """Devuelve el borde derecho del enemigo."""
         return self._rect.right

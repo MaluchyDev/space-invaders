@@ -1,10 +1,12 @@
 """Define la flota enemiga dentro de Space Invaders."""
 
+from random import choice
+
 import pygame
 
 import space_invaders.settings as cfg
 from space_invaders.enemy import Enemy
-from space_invaders.type_aliases import ColorRGB, HorizontalDirection
+from space_invaders.type_aliases import ColorRGB, HorizontalDirection, Position2D
 
 
 class EnemyFleet:
@@ -14,6 +16,11 @@ class EnemyFleet:
         """Inicializa el conjunto de enemigos."""
         self._enemies: list[Enemy] = self._create_enemies()
         self._horizontal_direction: HorizontalDirection = 1
+
+    @property
+    def has_enemies(self) -> bool:
+        """Indica si la formación contiene enemigos."""
+        return bool(self._enemies)
 
     def update(self, *, dt: float) -> None:
         """Actualiza el movimiento coordinado de la formación."""
@@ -46,6 +53,15 @@ class EnemyFleet:
         """Dibuja todos los enemigos de la formación."""
         for enemy in self._enemies:
             enemy.draw(surface=surface)
+
+    def get_random_shot_origin(self) -> Position2D | None:
+        """Devuelve un origen de disparo aleatorio o None si no hay enemigos."""
+        if not self._enemies:
+            return None
+
+        selected_enemy: Enemy = choice(self._enemies)
+
+        return selected_enemy.midbottom
 
     def _create_enemies(self) -> list[Enemy]:
         """Crea y devuelve los enemigos distribuidos en filas y columnas."""
