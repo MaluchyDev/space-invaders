@@ -37,6 +37,9 @@ class Game:
         self._enemy_projectiles: list[Projectile] = []
         self._enemy_shot_cooldown_remaining: float = 0.0
 
+        # === ESTADOS DE LA PARTIDA ===
+        self._score: int = 0
+
     def run(self) -> None:
         """Ejecuta el bucle principal hasta finalizar la aplicación."""
         while self._is_running:
@@ -87,10 +90,17 @@ class Game:
     def _update_world(self, *, dt: float) -> None:
         """Actualiza el mundo."""
         direction: HorizontalDirection = self._get_movement_direction()
+
+        # Actualiza las entidades.
         self._player.update(direction=direction, dt=dt)
         self._enemy_fleet.update(dt=dt)
+
+        # Actualiza los proyectiles.
         self._update_player_projectile(dt=dt)
         self._update_enemy_projectiles(dt=dt)
+
+        # Resuelve las colisiones.
+        self._resolve_player_projectile_collision()
 
     def _render_world(self) -> None:
         """Renderiza el mundo."""
@@ -200,3 +210,12 @@ class Game:
                 new_enemy_projectiles.append(enemy_projectile)
 
         self._enemy_projectiles = new_enemy_projectiles
+
+    def _resolve_player_projectile_collision(self) -> None:
+        """Resuelve el impacto del proyectil del jugador contra la formación enemiga."""
+        if self._player_projectile is None:
+            return
+
+        if self._enemy_fleet.remove_hit_enemy(projectile_rect=self._player_projectile.rect):
+            self._player_projectile = None
+            self._score += cfg.ENEMY_SCORE

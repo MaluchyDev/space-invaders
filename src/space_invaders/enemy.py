@@ -29,6 +29,11 @@ class Enemy:
         self._color: ColorRGB = color
 
     @property
+    def rect(self) -> pygame.Rect:
+        """Devuelve el rectángulo del enemigo."""
+        return self._rect.copy()
+
+    @property
     def left(self) -> int:
         """Devuelve el borde izquierdo del enemigo."""
         return self._rect.left

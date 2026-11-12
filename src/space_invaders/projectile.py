@@ -31,6 +31,11 @@ class Projectile:
         self._color: ColorRGB = color
 
     @property
+    def rect(self) -> pygame.Rect:
+        """Devuelve el rectángulo del proyectil."""
+        return self._rect.copy()
+
+    @property
     def bottom(self) -> int:
         """Devuelve el borde inferior del proyectil."""
         return self._rect.bottom

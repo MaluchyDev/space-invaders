@@ -10,7 +10,9 @@ from space_invaders.type_aliases import ColorRGB, HorizontalDirection, Position2
 
 
 class EnemyFleet:
-    """Administra un conjunto de enemigos, determina cómo se distribuyen y coordina su movimiento"""
+    """
+    Administra un conjunto de enemigos, determina cómo se distribuyen y coordina su movimiento.
+    """
 
     def __init__(self) -> None:
         """Inicializa el conjunto de enemigos."""
@@ -62,6 +64,15 @@ class EnemyFleet:
         selected_enemy: Enemy = choice(self._enemies)
 
         return selected_enemy.midbottom
+
+    def remove_hit_enemy(self, *, projectile_rect: pygame.Rect) -> bool:
+        """Elimina el primer enemigo alcanzado y confirma si hubo impacto."""
+        for index, enemy in enumerate(self._enemies):
+            if projectile_rect.colliderect(enemy.rect):
+                self._enemies.pop(index)
+                return True
+
+        return False
 
     def _create_enemies(self) -> list[Enemy]:
         """Crea y devuelve los enemigos distribuidos en filas y columnas."""
