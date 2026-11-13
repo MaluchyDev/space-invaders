@@ -25,10 +25,10 @@ class Game:
         # === JUGADOR ===
         self._player: Player = Player()
 
-        # === FLOTA ENEMIGA ===
+        # === FORMACIÓN ENEMIGA ===
         self._enemy_fleet: EnemyFleet = EnemyFleet()
 
-        # === PROYECTIL ===
+        # === PROYECTILES ===
         # Disparo del jugador
         self._player_projectile: Projectile | None = None
         self._player_shot_cooldown_remaining: float = 0.0
@@ -38,6 +38,8 @@ class Game:
         self._enemy_shot_cooldown_remaining: float = 0.0
 
         # === ESTADOS DE LA PARTIDA ===
+        self._player_lives: int = cfg.PLAYER_INITIAL_LIVES
+        self._invulnerability_remaining: float = 0.0
         self._score: int = 0
 
     def run(self) -> None:
@@ -56,7 +58,6 @@ class Game:
 
             # === RENDER ===
             self._screen.fill(cfg.BACKGROUND_COLOR)
-
             self._render_world()
 
             # === PRESENTACIÓN ===
@@ -91,6 +92,9 @@ class Game:
         """Actualiza el mundo."""
         direction: HorizontalDirection = self._get_movement_direction()
 
+        # Actualiza el temporizador de invulnerabilidad del jugador.
+        self._invulnerability_remaining = max(0.0, self._invulnerability_remaining - dt)
+
         # Actualiza las entidades.
         self._player.update(direction=direction, dt=dt)
         self._enemy_fleet.update(dt=dt)
@@ -101,6 +105,7 @@ class Game:
 
         # Resuelve las colisiones.
         self._resolve_player_projectile_collision()
+        self._resolve_enemy_projectile_collisions()
 
     def _render_world(self) -> None:
         """Renderiza el mundo."""
@@ -219,3 +224,21 @@ class Game:
         if self._enemy_fleet.remove_hit_enemy(projectile_rect=self._player_projectile.rect):
             self._player_projectile = None
             self._score += cfg.ENEMY_SCORE
+
+    def _resolve_enemy_projectile_collisions(self) -> None:
+        """Resuelve los impactos de los proyectiles enemigos contra el jugador."""
+        remaining_enemy_projectiles: list[Projectile] = []
+        player_rect: pygame.Rect = self._player.rect
+
+        for enemy_projectile in self._enemy_projectiles:
+            if enemy_projectile.rect.colliderect(player_rect):
+                # Aplica daño únicamente si el jugador es vulnerable y tiene vidas.
+                if self._player_lives > 0 and self._invulnerability_remaining == 0.0:
+                    self._player_lives = max(0, self._player_lives - 1)
+                    self._invulnerability_remaining = cfg.PLAYER_INVULNERABILITY_DURATION
+
+            else:
+                # Conserva los proyectiles que no han impactado.
+                remaining_enemy_projectiles.append(enemy_projectile)
+
+        self._enemy_projectiles = remaining_enemy_projectiles

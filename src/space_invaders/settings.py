@@ -27,6 +27,9 @@ PLAYER_START_MIDBOTTOM: Final[Position2D] = (
 PLAYER_COLOR: Final[ColorRGB] = (80, 200, 220)
 PLAYER_MOVE_SPEED: Final[float] = 320.0
 
+PLAYER_INITIAL_LIVES: Final[int] = 3
+PLAYER_INVULNERABILITY_DURATION: Final[float] = 1.5
+
 # === ENEMIGO ===
 ENEMY_WIDTH: Final[int] = 40
 ENEMY_HEIGHT: Final[int] = 28

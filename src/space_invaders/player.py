@@ -24,6 +24,11 @@ class Player:
         self._max_center_x: float = cfg.WINDOW_WIDTH - half_width
 
     @property
+    def rect(self) -> pygame.Rect:
+        """Devuelve el rectángulo del jugador."""
+        return self._rect.copy()
+
+    @property
     def midtop(self) -> Position2D:
         """Devuelve el centro del borde superior del jugador."""
         return self._rect.midtop
