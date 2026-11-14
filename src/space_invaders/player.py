@@ -29,6 +29,11 @@ class Player:
         return self._rect.copy()
 
     @property
+    def top(self) -> int:
+        """Devuelve el borde superior del jugador."""
+        return self._rect.top
+
+    @property
     def midtop(self) -> Position2D:
         """Devuelve el centro del borde superior del jugador."""
         return self._rect.midtop

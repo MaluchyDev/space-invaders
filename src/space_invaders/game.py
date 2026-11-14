@@ -4,6 +4,7 @@ import pygame
 
 import space_invaders.settings as cfg
 from space_invaders.enemy_fleet import EnemyFleet
+from space_invaders.game_state import GameState
 from space_invaders.player import Player
 from space_invaders.projectile import Projectile
 from space_invaders.type_aliases import HorizontalDirection, Position2D
@@ -24,6 +25,7 @@ class Game:
 
         # === JUGADOR ===
         self._player: Player = Player()
+        self._invulnerability_remaining: float = 0.0
 
         # === FORMACIÓN ENEMIGA ===
         self._enemy_fleet: EnemyFleet = EnemyFleet()
@@ -38,8 +40,8 @@ class Game:
         self._enemy_shot_cooldown_remaining: float = 0.0
 
         # === ESTADOS DE LA PARTIDA ===
+        self._state: GameState = GameState.RUNNING
         self._player_lives: int = cfg.PLAYER_INITIAL_LIVES
-        self._invulnerability_remaining: float = 0.0
         self._score: int = 0
 
     def run(self) -> None:
@@ -53,8 +55,10 @@ class Game:
             # === TIEMPO ===
             dt: float = self._clock.tick(cfg.FPS) / 1000.0
 
-            # === UPDATE ===
-            self._update_world(dt=dt)
+            if self._state == GameState.RUNNING:
+                # === UPDATE ===
+                defense_line_reached: bool = self._update_world(dt=dt)
+                self._check_end_conditions(defense_line_reached=defense_line_reached)
 
             # === RENDER ===
             self._screen.fill(cfg.BACKGROUND_COLOR)
@@ -88,8 +92,8 @@ class Game:
 
         return -1
 
-    def _update_world(self, *, dt: float) -> None:
-        """Actualiza el mundo."""
+    def _update_world(self, *, dt: float) -> bool:
+        """Actualiza el mundo e indica si se alcanzó la línea defensiva."""
         direction: HorizontalDirection = self._get_movement_direction()
 
         # Actualiza el temporizador de invulnerabilidad del jugador.
@@ -99,6 +103,11 @@ class Game:
         self._player.update(direction=direction, dt=dt)
         self._enemy_fleet.update(dt=dt)
 
+        # Comprueba si la formación enemiga alcanzó la línea defensiva.
+        defense_line_reached: bool = self._enemy_fleet.reached_defense_line(
+            defense_y=self._player.top
+        )
+
         # Actualiza los proyectiles.
         self._update_player_projectile(dt=dt)
         self._update_enemy_projectiles(dt=dt)
@@ -106,6 +115,8 @@ class Game:
         # Resuelve las colisiones.
         self._resolve_player_projectile_collision()
         self._resolve_enemy_projectile_collisions()
+
+        return defense_line_reached
 
     def _render_world(self) -> None:
         """Renderiza el mundo."""
@@ -242,3 +253,13 @@ class Game:
                 remaining_enemy_projectiles.append(enemy_projectile)
 
         self._enemy_projectiles = remaining_enemy_projectiles
+
+    def _check_end_conditions(self, *, defense_line_reached: bool) -> None:
+        """Comprueba las condiciones de victoria y derrota."""
+        if self._player_lives == 0 or defense_line_reached:
+            self._state = GameState.GAME_OVER
+            return
+
+        if not self._enemy_fleet.has_enemies:
+            self._state = GameState.VICTORY
+            return

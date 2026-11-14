@@ -74,6 +74,10 @@ class EnemyFleet:
 
         return False
 
+    def reached_defense_line(self, *, defense_y: int) -> bool:
+        """Indica si algún enemigo ha alcanzado la línea defensiva."""
+        return any(enemy.bottom >= defense_y for enemy in self._enemies)
+
     def _create_enemies(self) -> list[Enemy]:
         """Crea y devuelve los enemigos distribuidos en filas y columnas."""
         enemies: list[Enemy] = []

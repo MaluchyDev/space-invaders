@@ -48,6 +48,11 @@ class Enemy:
         """Devuelve el borde derecho del enemigo."""
         return self._rect.right
 
+    @property
+    def bottom(self) -> int:
+        """Devuelve el borde inferior del enemigo."""
+        return self._rect.bottom
+
     def move(self, *, dx: float, dy: float) -> None:
         """Desplaza el enemigo y actualiza su geometría."""
         new_x: float = self._logical_position[0] + dx
