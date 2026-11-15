@@ -2,6 +2,7 @@
 
 from typing import Final
 
+from space_invaders.hud import HUDConfig
 from space_invaders.type_aliases import ColorRGB, Position2D, Size
 
 # === SCREEN ===
@@ -77,3 +78,15 @@ ENEMY_PROJECTILE_COLOR: Final[ColorRGB] = (220, 70, 70)
 
 # === PUNTUACIÓN ===
 ENEMY_SCORE: Final[int] = 10
+
+# === HUD ===
+HUD_CONFIG: Final[HUDConfig] = HUDConfig(
+    info_font_size=32,
+    status_font_size=72,
+    info_text_color=(230, 230, 230),
+    status_text_color=(170, 190, 255),
+    margin=20,
+    layout_size=WINDOW_SIZE,
+    victory_message="VICTORY",
+    game_over_message="GAME OVER",
+)

@@ -5,6 +5,7 @@ import pygame
 import space_invaders.settings as cfg
 from space_invaders.enemy_fleet import EnemyFleet
 from space_invaders.game_state import GameState
+from space_invaders.hud import HUD
 from space_invaders.player import Player
 from space_invaders.projectile import Projectile
 from space_invaders.type_aliases import HorizontalDirection, Position2D
@@ -40,9 +41,16 @@ class Game:
         self._enemy_shot_cooldown_remaining: float = 0.0
 
         # === ESTADOS DE LA PARTIDA ===
-        self._state: GameState = GameState.RUNNING
-        self._player_lives: int = cfg.PLAYER_INITIAL_LIVES
+        self._game_state: GameState = GameState.RUNNING
         self._score: int = 0
+        self._player_lives: int = cfg.PLAYER_INITIAL_LIVES
+
+        # === PRESENTACIÓN DEL HUD ===
+        self._hud: HUD = HUD(
+            config=cfg.HUD_CONFIG,
+            initial_score=self._score,
+            initial_lives=self._player_lives,
+        )
 
     def run(self) -> None:
         """Ejecuta el bucle principal hasta finalizar la aplicación."""
@@ -55,14 +63,22 @@ class Game:
             # === TIEMPO ===
             dt: float = self._clock.tick(cfg.FPS) / 1000.0
 
-            if self._state == GameState.RUNNING:
-                # === UPDATE ===
+            # === UPDATE ===
+            if self._game_state == GameState.RUNNING:
                 defense_line_reached: bool = self._update_world(dt=dt)
                 self._check_end_conditions(defense_line_reached=defense_line_reached)
+
+            # Actualiza la presentación del HUD, incluso al finalizar la partida.
+            self._hud.update(
+                game_state=self._game_state,
+                score=self._score,
+                lives=self._player_lives,
+            )
 
             # === RENDER ===
             self._screen.fill(cfg.BACKGROUND_COLOR)
             self._render_world()
+            self._hud.draw(surface=self._screen)
 
             # === PRESENTACIÓN ===
             pygame.display.flip()
@@ -257,9 +273,9 @@ class Game:
     def _check_end_conditions(self, *, defense_line_reached: bool) -> None:
         """Comprueba las condiciones de victoria y derrota."""
         if self._player_lives == 0 or defense_line_reached:
-            self._state = GameState.GAME_OVER
+            self._game_state = GameState.GAME_OVER
             return
 
         if not self._enemy_fleet.has_enemies:
-            self._state = GameState.VICTORY
+            self._game_state = GameState.VICTORY
             return
