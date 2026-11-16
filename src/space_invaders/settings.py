@@ -87,6 +87,7 @@ HUD_CONFIG: Final[HUDConfig] = HUDConfig(
     status_text_color=(170, 190, 255),
     margin=20,
     layout_size=WINDOW_SIZE,
+    paused_message="PAUSED",
     victory_message="VICTORY",
     game_over_message="GAME OVER",
 )

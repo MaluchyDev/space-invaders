@@ -18,6 +18,7 @@ class HUDConfig:
     status_text_color: ColorRGB
     margin: int
     layout_size: Size
+    paused_message: str
     victory_message: str
     game_over_message: str
 
@@ -121,6 +122,9 @@ class HUD:
                 self._last_game_state = game_state
 
                 return
+
+            case GameState.PAUSED:
+                status_message = self._config.paused_message
 
             case GameState.VICTORY:
                 status_message = self._config.victory_message

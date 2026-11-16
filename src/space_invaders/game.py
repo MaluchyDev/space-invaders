@@ -93,6 +93,18 @@ class Game:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self._is_running = False
 
+            # === ESTADO DEL JUEGO ===
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                self._toggle_pause()
+
+    def _toggle_pause(self) -> None:
+        """Alterna la partida entre los estados de ejecución y pausa."""
+        if self._game_state is GameState.RUNNING:
+            self._game_state = GameState.PAUSED
+
+        elif self._game_state is GameState.PAUSED:
+            self._game_state = GameState.RUNNING
+
     def _get_movement_direction(self) -> HorizontalDirection:
         """Obtiene la dirección horizontal a partir del input continuo."""
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
