@@ -15,35 +15,39 @@ class Game:
     """Coordina el ciclo de vida y el bucle principal del juego."""
 
     def __init__(self) -> None:
-        """Inicializa los recursos y el estado inicial del juego."""
-        # === RECURSOS BASE DE PYGAME ===
+        """Inicializa los recursos de la aplicación y prepara la primera partida."""
+        # === RECURSOS DE LA APLICACIÓN ===
+        # Recursos base de Pygame.
         self._screen: pygame.Surface = pygame.display.set_mode(cfg.WINDOW_SIZE)
         pygame.display.set_caption(cfg.WINDOW_TITLE)
         self._clock: pygame.time.Clock = pygame.time.Clock()
 
-        # === CONTROL DE EJECUCIÓN ===
+        # Control de ejecución.
         self._is_running: bool = True
 
-        # === JUGADOR ===
-        self._player: Player = Player()
-        self._invulnerability_remaining: float = 0.0
+        # === ATRIBUTOS DE LA PARTIDA ===
+        # Jugador.
+        self._player: Player
+        self._invulnerability_remaining: float
 
-        # === FORMACIÓN ENEMIGA ===
-        self._enemy_fleet: EnemyFleet = EnemyFleet()
+        # Formación enemiga.
+        self._enemy_fleet: EnemyFleet
 
-        # === PROYECTILES ===
-        # Disparo del jugador
-        self._player_projectile: Projectile | None = None
-        self._player_shot_cooldown_remaining: float = 0.0
+        # Proyectiles.
+        # Disparo del jugador.
+        self._player_projectile: Projectile | None
+        self._player_shot_cooldown_remaining: float
 
-        # Disparo de los enemigos
-        self._enemy_projectiles: list[Projectile] = []
-        self._enemy_shot_cooldown_remaining: float = 0.0
+        # Disparo de los enemigos.
+        self._enemy_projectiles: list[Projectile]
+        self._enemy_shot_cooldown_remaining: float
 
-        # === ESTADOS DE LA PARTIDA ===
-        self._game_state: GameState = GameState.RUNNING
-        self._score: int = 0
-        self._player_lives: int = cfg.PLAYER_INITIAL_LIVES
+        # Estado de la partida.
+        self._game_state: GameState
+        self._score: int
+        self._player_lives: int
+
+        self._start_new_game()
 
         # === PRESENTACIÓN DEL HUD ===
         self._hud: HUD = HUD(
@@ -94,8 +98,17 @@ class Game:
                 self._is_running = False
 
             # === ESTADO DEL JUEGO ===
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                self._toggle_pause()
+            if event.type == pygame.KEYDOWN:
+                # Pausa.
+                if event.key == pygame.K_p:
+                    self._toggle_pause()
+
+                # Reinicio.
+                elif event.key == pygame.K_r and self._game_state in (
+                    GameState.VICTORY,
+                    GameState.GAME_OVER,
+                ):
+                    self._start_new_game()
 
     def _toggle_pause(self) -> None:
         """Alterna la partida entre los estados de ejecución y pausa."""
@@ -291,3 +304,26 @@ class Game:
         if not self._enemy_fleet.has_enemies:
             self._game_state = GameState.VICTORY
             return
+
+    def _start_new_game(self) -> None:
+        """Inicializa las entidades y el estado de una nueva partida."""
+        # === JUGADOR ===
+        self._player = Player()
+        self._invulnerability_remaining = 0.0
+
+        # === FORMACIÓN ENEMIGA ===
+        self._enemy_fleet = EnemyFleet()
+
+        # === PROYECTILES ===
+        # Disparo del jugador.
+        self._player_projectile = None
+        self._player_shot_cooldown_remaining = 0.0
+
+        # Disparo de los enemigos.
+        self._enemy_projectiles = []
+        self._enemy_shot_cooldown_remaining = 0.0
+
+        # === ESTADOS DE LA PARTIDA ===
+        self._game_state = GameState.RUNNING
+        self._score = 0
+        self._player_lives = cfg.PLAYER_INITIAL_LIVES
