@@ -161,12 +161,13 @@ class Game:
 
     def _render_world(self) -> None:
         """Renderiza el mundo."""
-        # Dibuja al jugador y la flota enemiga.
-        self._player.draw(surface=self._screen, color=cfg.PLAYER_COLOR)
+        # Dibuja al jugador cuando corresponde y la flota enemiga.
+        if self._should_draw_player():
+            self._player.draw(surface=self._screen, color=cfg.PLAYER_COLOR)
+
         self._enemy_fleet.draw(surface=self._screen)
 
         # Dibuja los proyectiles del jugador y de la flota enemiga.
-
         if self._player_projectile is not None:
             self._player_projectile.draw(surface=self._screen)
 
@@ -294,6 +295,21 @@ class Game:
                 remaining_enemy_projectiles.append(enemy_projectile)
 
         self._enemy_projectiles = remaining_enemy_projectiles
+
+    def _should_draw_player(self) -> bool:
+        """Indica si debe dibujarse el jugador según el estado y su invulnerabilidad."""
+        if self._game_state in (GameState.VICTORY, GameState.GAME_OVER):
+            return True
+
+        if self._invulnerability_remaining == 0.0:
+            return True
+
+        invulnerability_elapsed: float = (
+            cfg.PLAYER_INVULNERABILITY_DURATION - self._invulnerability_remaining
+        )
+        blink_phase: int = int(invulnerability_elapsed / cfg.PLAYER_BLINK_INTERVAL)
+
+        return blink_phase % 2 == 0
 
     def _check_end_conditions(self, *, defense_line_reached: bool) -> None:
         """Comprueba las condiciones de victoria y derrota."""

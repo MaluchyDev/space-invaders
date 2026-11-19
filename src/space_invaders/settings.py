@@ -30,6 +30,7 @@ PLAYER_MOVE_SPEED: Final[float] = 320.0
 
 PLAYER_INITIAL_LIVES: Final[int] = 3
 PLAYER_INVULNERABILITY_DURATION: Final[float] = 1.5
+PLAYER_BLINK_INTERVAL: Final[float] = 0.10
 
 # === ENEMIGO ===
 ENEMY_WIDTH: Final[int] = 40
