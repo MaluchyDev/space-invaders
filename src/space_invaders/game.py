@@ -8,6 +8,7 @@ from space_invaders.game_state import GameState
 from space_invaders.hud import HUD
 from space_invaders.player import Player
 from space_invaders.projectile import Projectile
+from space_invaders.sound_effects import SoundEffects
 from space_invaders.type_aliases import HorizontalDirection, Position2D
 
 
@@ -21,6 +22,9 @@ class Game:
         self._screen: pygame.Surface = pygame.display.set_mode(cfg.WINDOW_SIZE)
         pygame.display.set_caption(cfg.WINDOW_TITLE)
         self._clock: pygame.time.Clock = pygame.time.Clock()
+
+        # Recursos de audio.
+        self._sound_effects: SoundEffects = SoundEffects()
 
         # Control de ejecución.
         self._is_running: bool = True
@@ -190,6 +194,8 @@ class Game:
             color=cfg.PLAYER_PROJECTILE_COLOR,
         )
 
+        self._sound_effects.play_player_shot()
+
         # Reinicia el cooldown.
         self._player_shot_cooldown_remaining = cfg.PLAYER_SHOT_COOLDOWN
 
@@ -230,6 +236,9 @@ class Game:
         # Registra el proyectil y reinicia el cooldown.
         self._enemy_projectiles.append(projectile)
         self._enemy_shot_cooldown_remaining = cfg.ENEMY_SHOT_COOLDOWN
+
+        # Reproduce el sonido del disparo confirmado.
+        self._sound_effects.play_enemy_shot()
 
     def _enemy_can_shoot(self) -> bool:
         """Indica si puede generarse un nuevo proyectil enemigo."""
@@ -278,6 +287,8 @@ class Game:
             self._player_projectile = None
             self._score += cfg.ENEMY_SCORE
 
+            self._sound_effects.play_enemy_destroyed()
+
     def _resolve_enemy_projectile_collisions(self) -> None:
         """Resuelve los impactos de los proyectiles enemigos contra el jugador."""
         remaining_enemy_projectiles: list[Projectile] = []
@@ -289,6 +300,8 @@ class Game:
                 if self._player_lives > 0 and self._invulnerability_remaining == 0.0:
                     self._player_lives = max(0, self._player_lives - 1)
                     self._invulnerability_remaining = cfg.PLAYER_INVULNERABILITY_DURATION
+
+                    self._sound_effects.play_player_hit()
 
             else:
                 # Conserva los proyectiles que no han impactado.

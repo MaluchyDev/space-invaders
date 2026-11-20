@@ -1,5 +1,6 @@
 """Define la configuración estable de Space Invaders."""
 
+from pathlib import Path
 from typing import Final
 
 from space_invaders.hud import HUDConfig
@@ -92,3 +93,19 @@ HUD_CONFIG: Final[HUDConfig] = HUDConfig(
     victory_message="VICTORY",
     game_over_message="GAME OVER",
 )
+
+# === RUTAS Y ASSETS ===
+PACKAGE_ROOT: Final[Path] = Path(__file__).resolve().parent
+
+SFX_DIR: Final[Path] = PACKAGE_ROOT / "assets" / "sfx"
+
+SFX_PLAYER_SHOT_PATH: Final[Path] = SFX_DIR / "player_shot.wav"
+SFX_PLAYER_HIT_PATH: Final[Path] = SFX_DIR / "player_hit.wav"
+SFX_ENEMY_SHOT_PATH: Final[Path] = SFX_DIR / "enemy_shot.wav"
+SFX_ENEMY_DESTROYED_PATH: Final[Path] = SFX_DIR / "enemy_destroyed.wav"
+
+# === CONFIGURACIÓN DE AUDIO ===
+SFX_PLAYER_SHOT_VOLUME: Final[float] = 0.4
+SFX_PLAYER_HIT_VOLUME: Final[float] = 0.8
+SFX_ENEMY_SHOT_VOLUME: Final[float] = 0.2
+SFX_ENEMY_DESTROYED_VOLUME: Final[float] = 0.6
