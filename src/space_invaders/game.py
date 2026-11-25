@@ -194,10 +194,11 @@ class Game:
             color=cfg.PLAYER_PROJECTILE_COLOR,
         )
 
-        self._sound_effects.play_player_shot()
-
         # Reinicia el cooldown.
         self._player_shot_cooldown_remaining = cfg.PLAYER_SHOT_COOLDOWN
+
+        # Reproduce el sonido del disparo confirmado.
+        self._sound_effects.play_player_shot()
 
     def _player_can_shoot(self) -> bool:
         """Indica si el jugador solicita un disparo y puede realizarlo."""

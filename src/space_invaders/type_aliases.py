@@ -8,7 +8,7 @@ type Position2D = tuple[int, int]
 type Position2DFloat = tuple[float, float]
 
 # Desplazamiento visual continuo; se discretiza al llegar al render.
-type Offset2D = tuple[float, float]
+type Offset2D = tuple[float, float] # Partículas
 
 # === PRESENTACIÓN ===
 type ColorRGB = tuple[int, int, int]
